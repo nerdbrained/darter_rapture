@@ -1,2 +1,2 @@
 # darter_rapture
-Analysis scripts for working with low-coverage whole-genome and RADseq+sequence capture (Rapture) data
+Analysis scripts for working with low-coverage whole-genome and RADseq+sequence capture (Rapture) data. Bait sequences are also included.
