@@ -1,4 +1,4 @@
-#### Rapture alignment and filtering pipeline
+#### Rapture alignment, filtering, and anlaysis pipeline
 #### First step: running Flip2BeRAD python script to remove reads that do not contain a barcode on either forward or reverse read
 #### Need Flip2BeRAD script (Git Repository: https://github.com/tylerhether/Flip2BeRAD) and text file of barcodes <barcodelist> in directory with raw sequencing files <flip_dir>
 
