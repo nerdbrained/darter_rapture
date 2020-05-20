@@ -1,0 +1,286 @@
+#### Rapture alignment and filtering pipeline
+#### First step: running Flip2BeRAD python script to remove reads that do not contain a barcode on either forward or reverse read
+#### Need Flip2BeRAD script (Git Repository: https://github.com/tylerhether/Flip2BeRAD) and text file of barcodes <barcodelist> in directory with raw sequencing files <flip_dir>
+
+#### script for running on SLURM system
+#!/bin/bash
+#SBATCH --partition general
+#SBATCH --nodes 1
+#SBATCH --ntasks-per-node 1
+#SBATCH --exclusive
+#SBATCH --time 40:00:00
+#SBATCH --mem-per-cpu 2000
+#SBATCH --job-name flip
+#SBATCH --output flip2b_output.txt
+
+# load necessary modules, e.g.
+module load Python/2.7.14
+ 
+# change to the working directory where your code is located
+cd <flip>
+
+# call your executable
+# note: changing offset to 2 after examining output FASTA
+python ./Flip2BeRAD.py -f ./<R1>.fastq -r ./<R2>.fastq -b ./<barcodelist> -c TGCA -m 1 -o 2
+
+
+#### trim first 2 chars from both seqs and quality scores if needed (
+sed '2~2s/^\(.\{2\}\)//' filtered_forward.fastq > filtered_fwd_trim2.fastq
+
+
+#### Move filtered reads to clonefilter folder
+mkdir <flip_dir>/clonefilter
+cd <flip_dir>
+mv filtered* <flip_dir>/clonefilter
+cd <flip_dir>/clonefilter
+mkdir clonefilter_out
+
+#### Script to filter clones in Stacks: 
+
+#!/bin/bash
+#SBATCH --partition general
+#SBATCH --nodes 1
+#SBATCH --ntasks-per-node 2
+#SBATCH --exclusive
+#SBATCH --time 20:00:00
+#SBATCH --mem-per-cpu 20000
+#SBATCH --job-name clonefilter_EC13
+#SBATCH --output clonefilter_EC13_output.txt
+
+module load stacks
+cd <flip_dir>/clonefilter
+clone_filter -1 ./filtered_fwd_trim2.fastq -2 ./filtered_reverse.fastq -i fastq -o ./clonefilter_out -D
+
+#### Move filtered files to processRADtags folder
+
+cd <flip_dir>
+mkdir processRADtags
+cd <flip_dir>/processRADtags
+mkdir processed_samples
+
+cd <flip_dir>/clonefilter/clonefilter_out
+mv filtered_fwd_trim2.1.fq <flip_dir>/processRADtags
+mv filtered_reverse.2.fq <flip_dir>/processRADtags
+
+#### Run PROCESS RADTAGS in stacks to demultiplex filtered data using the following SLURM script. Need space-deleimited file with individuals + barcodes <barcodekey>
+
+#!/bin/bash
+#SBATCH --partition general
+#SBATCH --nodes 1
+#SBATCH --ntasks-per-node 1
+#SBATCH --exclusive
+#SBATCH --time 5:00:00
+#SBATCH --mem-per-cpu 20000
+#SBATCH --job-name demulti_EC13
+#SBATCH --output demulti_EC13_output.txt
+
+module load stacks
+cd <flip_dir>/processRADtags
+process_radtags -1 ./filtered_fwd_trim2.1.fq -2 ./filtered_reverse.2.fq -i fastq -e sbfI -b ./<barcode_key>  -o ./processed_samples --barcode_dist_2 3 -r -q
+
+#### Move all demultiplexed .fq files (can pool from multiple Rapture runs) to a new folder to align to reference
+
+#### make list of all sequence files to be aligned
+ls *.1.* | sed "s/\.fq//g" > bamlist1
+ls *.2.* | sed "s/\.fq//g" > bamlist2
+paste bamlist? > bamlist
+
+#### index reference genome if needed
+samtools faidx darter_large.fasta
+
+#### Many of the following scripts are taken or modified from Ryan Peek's GitHub (https://ryanpeek.github.io)
+#### Script for aligning in parallel: run_align.sh
+
+#!/bin/bash -l
+list=$1
+ref=$2
+wc=$(wc -l ${list} | awk '{print $1}')
+x=1
+while [ $x -le $wc ] 
+do
+	string="sed -n ${x}p ${list}" 
+	str=$($string)
+ 	var=$(echo $str | awk -F"\t" '{print $1, $2}')   
+	set -- $var
+	c1=$1
+	c2=$2
+ 	echo "#!/bin/bash -l
+ 	#SBATCH -o slurm_outs/01a_align_flt-%j.out
+	#SBATCH -J alignflt
+	module load OpenMPI/2.1.1
+	module load GCC/6.4.0-2.28
+	module load SAMtools
+	module load BWA/0.7.17
+ 	bwa mem $ref ${c1}.fq ${c2}.fq > ${c1}.aln-pe.sam
+	samtools view -Sb -o ${c1}.aln-pe.bam ${c1}.aln-pe.sam
+	samtools sort -o ${c1}.sort.bam ${c1}.aln-pe.bam
+	samtools view -f 0x2 -b ${c1}.sort.bam > ${c1}.sort.flt1.bam" > ${c1}.sh
+	sbatch -t 24:00:00 -p med --mem=4G ${c1}.sh
+	sleep 2
+	x=$(( $x + 1 ))
+done
+
+#### Save alignment script and run: sh run_align.sh bamlist <reference>.fasta
+
+#### Make a bed file for positions of short/long Rapture loci with your genome
+
+bwa mem <reference>.fasta <shortRapturebaits>.fasta > shortalign.sam
+samtools view -Sb -o shortalign.bam shortalign.sam
+samtools sort -o shortalign.sort.bam shortalign.bam
+samtools index shortalign.sort.bam
+
+bwa mem <reference>.fasta <longRapturebaits>.fasta > longalign.sam
+samtools view -Sb -o longalign.bam longalign.sam
+samtools sort -o longalign.sort.bam longalign.bam
+samtools index longalign.sort.bam
+
+bedtools bamtobed -i shortalign.sort.bam > shortalign.bed
+bedtools merge -i shortalign.bed > shortmerge.bed
+
+bedtools bamtobed -i longalign.sort.bam > longalign.bed
+bedtools merge -i longalign.bed > longmerge.bed
+
+
+#### Add a +500bp buffer for short loci
+
+samtools faidx <reference>.fasta
+awk -v OFS='\t' {'print $1,$2'} <reference>.fasta.fai > genomeFile.txt
+slopBed -i shortmerge.bed -g genomeFile.txt -r 500 -l 0 > shortbuffer.bed
+
+#### Add a +/-500bp buffer for long loci
+
+slopBed -i longmerge.bed -g Ecr_genomeFile.txt -r 500 -l 500 > longbuffer.bed
+
+#### combining bed files is very simple
+
+cat shortbuffer.bed longbuffer.bed > allbuffer.bed
+
+#### make list of bam files for calculating coverage and filtering
+
+ls *.sort.flt1.bam > filterlist
+
+
+###run bedtools and generate coverage report per locus for each sample - covcomp.sh:
+
+#!/bin/bash -l
+list=$1
+ref=$2
+wc=$(wc -l ${list} | awk '{print $1}')
+x=1
+while [ $x -le $wc ] 
+do
+	string="sed -n ${x}p ${list}" 
+	str=$($string)
+ 	var=$(echo $str | awk -F"\t" '{print $1}')   
+	set -- $var
+	c1=$1
+ 	echo "#!/bin/bash -l
+ 	#SBATCH -o slurm_outs/covcomp-%j.out
+	#SBATCH -J covcomp
+	module load OpenMPI/2.1.2
+	module load GCC/6.4.0-2.28
+	module load SAMtools
+	module load bedtools
+ 	bedtools coverage -a $ref -b ${c1} > ${c1}.recov" > ${c1}cov.sh
+	sbatch -t 24:00:00 -p med --mem=4G ${c1}cov.sh
+	sleep 2
+	x=$(( $x + 1 ))
+done
+
+#### get coverage for all loci: sh covcomp.sh filterlist allbuffer.bed
+
+### this generates a single file for each individual
+
+#### script for summarizing coverage files: covsum.sh
+
+#!/bin/bash -l
+list=bamlistall
+echo "individual,5x,10x,20x,50x,mapped2rapt" >> indivcovsum.csv
+seqno=$(wc -l ${list} | awk '{print $1}')
+x=1
+while [ $x -le $seqno ] 
+do
+	string="sed -n ${x}p ${list}" 
+	seqname=$($string)
+ 	five=$(awk '$4>4' ${seqname}.cov | wc -l)
+	ten=$(awk '$4>9' ${seqname}.cov | wc -l)
+	twenty=$(awk '$4>19' ${seqname}.cov | wc -l)
+	fifty=$(awk '$4>49' ${seqname}.cov | wc -l)
+	total=$(awk 'NR > 3 { print $4 }' ${seqname}.cov | paste -sd+ - | bc)
+	echo $seqname $five $ten $twenty $fifty $total | tr ' ' , >> indivcovsum.csv
+	x=$(( $x + 1 ))
+done
+
+#### just run sh covsum.sh
+
+###script getting per-base coverage for each rapture locus for each sample - perbase.sh
+
+#!/bin/bash -l
+list=$1
+ref=$2
+wc=$(wc -l ${list} | awk '{print $1}')
+x=1
+while [ $x -le $wc ] 
+do
+	string="sed -n ${x}p ${list}" 
+	str=$($string)
+ 	var=$(echo $str | awk -F"\t" '{print $1}')   
+	set -- $var
+	c1=$1
+ 	echo "#!/bin/bash -l
+ 	#SBATCH -o slurm_outs/covcomp-%j.out
+	#SBATCH -J covcomp
+	module load OpenMPI/2.1.2
+	module load GCC/6.4.0-2.28
+	module load SAMtools
+	module load bedtools
+ 	bedtools coverage -d -a NSbuffer.bed -b ${c1} > ${c1}.perbase" > ${c1}NSperbase.sh
+	sbatch -t 24:00:00 -p med --mem=10G ${c1}NSperbase.sh
+	sleep 2
+	x=$(( $x + 1 ))
+done
+
+#### get per-base coverage: sh perbase.sh filterlist allbuffer.bed
+
+#### script for filtering bam files in parallel: filter.sh
+#!/bin/bash -l
+list=$1
+wc=$(wc -l ${list} | awk '{print $1}')
+x=1
+while [ $x -le $wc ] 
+do
+	string="sed -n ${x}p ${list}" 
+	str=$($string)
+ 	var=$(echo $str | awk -F"\t" '{print $1}')   
+	set -- $var
+	c1=$1
+	c2=$(echo $c1 | awk -F'.' '{print $1}')
+ 	echo "#!/bin/bash -l
+ 	#SBATCH -o slurm_outs/covcomp-%j.out
+	#SBATCH -J covcomp
+	module load OpenMPI/2.1.2
+	module load GCC/6.4.0-2.28
+	module load SAMtools
+ 	samtools view -b -h -L allbuffer.bed -o bamfilter/${c2}.filter.bam bams/${c1} " > ${c1}.sh
+	sbatch -t 24:00:00 -p med --mem=10G ${c1}.NSsh
+	sleep 2
+	x=$(( $x + 1 ))
+done
+
+#### run with: sh filter.sh filterlist
+
+#### calculate genotype likelihoods with list of filtered files <Ecrbamlist> in ANGSD
+#### we did this locally and had to increase maximum # of open files 
+
+ulimit -n 5000
+angsd -b Ecrbamlist -GL 2 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -nThreads 10 -out angsdgl_Ecr
+
+#### calling genotypes with PCAngsd
+
+python pcangsd.py -beagle angsdgl_Ecr.beagle.gz -geno 0.9 -o arkgenosRaptEcr -threads 10
+
+#### Estimate covariance matrix and individual admixture proportions
+python pcangsd.py -beagle angsdgl_Ecr.beagle.gz -admix -o ECr_Adalign_admix -threads 10
+
+##### Estimate covariance matrix and perform selection scan
+python pcangsd.py -beagle angsdgl_Ecr.beagle.gz -selection 1 -o ECr_Adalign_sel -threads 10
