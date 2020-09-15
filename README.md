@@ -1,6 +1,8 @@
 # darter_rapture
-Analysis scripts for working with low-coverage whole-genome and RADseq+sequence capture (Rapture) data. Bait sequences are also included.
+Analysis scripts for working with low-coverage whole-genome and RADseq+sequence capture (Rapture) data, from Reid et al. 2020. 
 
-*Is this markup, or what???*
+For a step-by-step description of the Rapture pipeline see: Rapture_pipeline.md
 
-<h1> Hells yeah it's markup!!
+For a step-by-step description of the WGS pipeline see: WGS_pipeline.md 
+
+The bait sequences developed for darters (genus Etheostoma) can be found at: final.set.fas
