@@ -31,7 +31,6 @@ This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences f
 This can be done for an individual sequence files <sample1>.R1.fq.gz <sample1>.R2.fq.gz and a given reference <reference.fasta> using these commands:
 
     bwa mem <reference.fasta> <sample1>.R1.fq.gz <sample1>.R2.fq.gz > <sample1>.aln-pe.sam
-	
     samtools view -Sb -o <sample1>.aln-pe.bam <sample1>.aln-pe.sam
 
     samtools sort -n -o <sample1>.sort.bam <sample1>.aln-pe.bam
