@@ -1,10 +1,10 @@
 # WGS Alignment and Analysis Pipeline
   
-Pipeline for aligning WGS data to a given reference genome, extracting coverage data, and performing ANGSD/PCAngsd analyses
+Pipeline for aligning low- to medium-coverage WGS data to a given reference genome, extracting coverage data, and performing ANGSD/PCAngsd analyses
 
 Note that many of these scripts are taken or modified from Ryan Peek's GitHub (https://ryanpeek.github.io)
 
-Requirements: SAMtools, BWA, ANGSD, pcangsd
+Requirements: SAMtools, BWA, ANGSD, PCAngsd, Python with Numpy
 
 This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences from a given Illumina are already demultiplexed and compiled in a folder, along with fasta file for reference genome.
 
@@ -64,7 +64,7 @@ If you have two folders of files with identical filenames ('mergelist') to be me
 
 ## Move beagle file to PCAngsd folder, call genotypes with PCAngsd
 
-    python pcangsd.py -beagle angsdgl_WGS.beagle.gz -geno 0.9 -o arkgenosRaptEcr -threads 10
+    python pcangsd.py -beagle angsdgl_WGS.beagle.gz -geno 0.9 -o genosWGS -threads 10
     
 ## Estimate covariance matrix and individual admixture proportions
 
@@ -73,3 +73,27 @@ If you have two folders of files with identical filenames ('mergelist') to be me
 ## Estimate covariance matrix and perform selection scan
 
     python pcangsd.py -beagle angsdgl_WGS.beagle.gz -selection 1 -sites_save -o WGS_sel -threads 10
+    
+## PCAngsd output is in numpy format - run these in python to read and output data in .csv form
+
+To read genotypes and output a summary of per indiviual of # SNPs homozygous for the reference and alternate alleles, heterozygous, or missing data:
+
+    import numpy
+    data=numpy.load('genosWGS.geno.npy')
+    numpy.savetxt("genosWGS.csv",data,delimiter=",")
+    homalt = numpy.count_nonzero(data == 2, axis=1)
+    homref = numpy.count_nonzero(data == 0, axis=1)
+    homhet = numpy.count_nonzero(data == 1, axis=1)
+    hommis = numpy.count_nonzero(data == -9, axis=1)
+    genosum=numpy.column_stack((homref,homhet,homalt,hommis))
+    numpy.savetxt("arkgenosumEcr_indf.csv",genosum,delimiter=",")
+
+To read admixture results and output Q matrix as a CSV:
+
+    data=numpy.load('WGS_admix.admix.Q.npy')
+    numpy.savetxt("WGS_admix.csv",data,delimiter=",")
+
+To read selection results and output selection scan statistics for each locus along each PC axis:
+
+    data=numpy.load('WGS_sel.selection.npy')
+    numpy.savetxt("WGS_sel.csv",data,delimiter=",")
