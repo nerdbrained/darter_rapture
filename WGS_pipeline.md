@@ -22,13 +22,13 @@ This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences f
 
     paste bamlist? > bamlist
 
-### Index reference genome if needed
+### Index reference genome if needed:
 
     samtools index <reference.fasta>
 
-### Align sequences to reference using BWA, sort, filter, and marking + removing duplicates using SAMtools.
+### Align sequences to reference using BWA, sort, filter, and marking + removing duplicates using BWA + SAMtools:
 
-This can be done for an individual sequence files 'sample.R1.fastq.gz' 'sample.R2.fastq.gz' and a given reference 'reference.fasta' using these commands:
+This can be done for an individual sequence files ('sample.R1.fastq.gz' and 'sample.R2.fastq.gz') and a given reference ('reference.fasta') using these commands:
 
     bwa mem <reference.fasta> <sample>.R1.fastq.gz <sample>.R2.fastq.gz > <sample>.aln-pe.sam
     samtools view -Sb -o <sample>.aln-pe.bam <sample>.aln-pe.sam
@@ -38,7 +38,16 @@ This can be done for an individual sequence files 'sample.R1.fastq.gz' 'sample.R
     samtools sort -o <sample>.positionsort.bam <sample>.fixmate.bam
     samtools markdup -r <sample>.positionsort.bam <sample>.rmdup.bam
 
-This can also be implemented in parallel over a list of sequences <bamlist> using the run_WGAalign.sh script on a SLURM system:
+This can also be implemented in parallel over a list of sequences ('bamlist') using the run_WGAalign.sh script on a SLURM system:
   
     sh run_WGAalign.sh <bamlist> <reference.fasta>
 
+### Merge bam files for samples split across multiple lanes if needed:
+
+For two individual files ('file1.rmdup.bam and file2.rmdup.bam'):
+
+    samtools merge mergebams/${str} <folder1>/${str} <folder2>/${str} > ${str}.sh
+    
+If you have two folders of files with identical filenames ('mergelist') to be merged you can use the merge.sh script (alter the foldernames first) on a SLURM system to merge bam files in parallel:
+
+    sh merge.sh mergelist
