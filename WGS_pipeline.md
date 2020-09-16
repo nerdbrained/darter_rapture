@@ -28,9 +28,9 @@ This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences f
 
 ### Align sequences to reference using BWA, sort, filter, and marking + removing duplicates using SAMtools.
 
-This can be done for an individual sequence files 'sample.R1.fq.gz' 'sample.R2.fq.gz' and a given reference 'reference.fasta' using these commands:
+This can be done for an individual sequence files 'sample.R1.fastq.gz' 'sample.R2.fastq.gz' and a given reference 'reference.fasta' using these commands:
 
-    bwa mem <reference.fasta> <sample>.R1.fq.gz <sample>.R2.fq.gz > <sample>.aln-pe.sam
+    bwa mem <reference.fasta> <sample>.R1.fastq.gz <sample>.R2.fastq.gz > <sample>.aln-pe.sam
     samtools view -Sb -o <sample>.aln-pe.bam <sample>.aln-pe.sam
     samtools sort -n -o <sample>.sort.bam <sample>.aln-pe.bam
     samtools view -f 0x2 -b <sample>.sort.bam > <sample>.sort.filt.bam
