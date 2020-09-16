@@ -133,6 +133,16 @@ Script for filtering all .bam files in parallel on a SLURM system - filter.sh:
 
     sh filter.sh filterlist
 
+## Generating individual sequence files
+
+This can be done in Stacks - we generated a reduced subset of .bam files for phylogenetic/phylogeographic analyses. All files need to have a simple naming format ('samplename.bam') and you need to provide a tab-delimited popmap file with the samplename prefix and the identifier you want it to have in the sequence file. Stacks command: 
+
+    ref_map.pl --samples bams/ --popmap bam_indmap -o stacks_ind -X "populations: --fasta_samples --phylip --phylip_var --phylip_var_all"
+
+## Phylogenetic analyses and plotting
+
+See darterrapture_phyloscripts.R
+
 ## For a list of bam files ('bamlist') calculate genotype likelihoods in ANGSD
 We did this locally and had to increase maximum # of open files. Change the -minInd parameter to 1/2 of total number of individuals.
 
