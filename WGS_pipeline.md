@@ -1,16 +1,16 @@
-#WGS Alignment and Analysis Pipeline
+# WGS Alignment and Analysis Pipeline
   
 Pipeline for aligning WGS data to a given reference genome, extracting coverage data, and performing ANGSD/PCAngsd analyses
 Note that many of these scripts are taken or modified from Ryan Peek's GitHub (https://ryanpeek.github.io)
 This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences from a given Illumina are already demultiplexed and compiled in a folder
 
-##Align sequences to a reference
+## Align sequences to a reference
 
-###Navigate to your sequence folder: 
+### Navigate to your sequence folder: 
 
 cd /<sequencefolder>
 
-###Make list of all sequence files in folder:
+### Make list of all sequence files in folder:
 
 ls *R1* | sed "s/\.fq//g" > bamlist1
 ls *R2* | sed "s/\.fq//g" > bamlist2
