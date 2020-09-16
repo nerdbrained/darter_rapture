@@ -28,19 +28,14 @@ This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences f
 
 ### Align sequences to reference using BWA, sort, filter, and marking + removing duplicates using SAMtools.
 
-This can be done for an individual sequence files <sample>.R1.fq.gz <sample>.R2.fq.gz and a given reference <reference.fasta> using these commands:
+This can be done for an individual sequence files <samp>.R1.fq.gz <samp>.R2.fq.gz and a given reference <reference.fasta> using these commands:
 
     bwa mem <reference.fasta> <sample>.R1.fq.gz <sample>.R2.fq.gz > <sample>.aln-pe.sam
     samtools view -Sb -o <sample>.aln-pe.bam <sample>.aln-pe.sam
-
     samtools sort -n -o <sample>.sort.bam <sample>.aln-pe.bam
-
     samtools view -f 0x2 -b <sample>.sort.bam > <sample>.sort.filt.bam
-
     samtools fixmate -m <sample>.sort.filt.bam <sample>.fixmate.bam
-
     samtools sort -o <sample>.positionsort.bam <sample>.fixmate.bam
-
     samtools markdup -r <sample>.positionsort.bam <sample>.rmdup.bam
 
 This can also be implemented in parallel over a list of sequences <bamlist> using the run_WGAalign.sh script on a SLURM system:
