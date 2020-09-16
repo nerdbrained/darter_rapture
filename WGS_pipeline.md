@@ -51,3 +51,9 @@ For two individual files ('file1.rmdup.bam and file2.rmdup.bam'):
 If you have two folders of files with identical filenames ('mergelist') to be merged you can use the merge.sh script (alter the foldernames first) on a SLURM system to merge bam files in parallel:
 
     sh merge.sh mergelist
+
+## Calculate coverage and write to a file called 'covout' for each file 'name'
+
+    echo "<name>" >> covout
+    samtools depth <name>.rmdup.bam |  awk '{sum+=$3} END { print "Average (covered sites) = ",sum/NR}' >> covout
+    samtools depth -a <name>.rmdup.bam |  awk '{sum+=$3} END { print "Average (whole genome) = ",sum/NR}' >> covout
