@@ -52,8 +52,24 @@ If you have two folders of files with identical filenames ('mergelist') to be me
 
     sh merge.sh mergelist
 
-## Calculate coverage and write to a file called 'covout' for each file 'name'
+## Calculate coverage and write to a file called 'covout' for each file ('name')
 
     echo "<name>" >> covout
     samtools depth <name>.rmdup.bam |  awk '{sum+=$3} END { print "Average (covered sites) = ",sum/NR}' >> covout
     samtools depth -a <name>.rmdup.bam |  awk '{sum+=$3} END { print "Average (whole genome) = ",sum/NR}' >> covout
+
+## For a list of bam files ('bamlist') calculate genotype likelihoods in ANGSD
+
+    angsd -b bamlist -GL 2 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -minInd 12 -minMaf 0.05 -nThreads 10 -out angsdgl_WGS
+
+## Call genotypes with PCAngsd
+
+    python pcangsd.py -beagle angsdgl_WGS.beagle.gz -geno 0.9 -o arkgenosRaptEcr -threads 10
+    
+## Estimate covariance matrix and individual admixture proportions
+
+    python pcangsd.py -beagle angsdgl_WGS.beagle.gz -admix -o WGS_admix -threads 10
+    
+## Estimate covariance matrix and perform selection scan
+
+    python pcangsd.py -beagle angsdgl_WGS.beagle.gz -selection 1 -o WGS_sel -threads 10
