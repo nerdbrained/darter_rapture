@@ -62,7 +62,7 @@ If you have two folders of files with identical filenames ('mergelist') to be me
 
     angsd -b bamlist -GL 2 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -minInd 12 -minMaf 0.05 -nThreads 10 -out angsdgl_WGS
 
-## Call genotypes with PCAngsd
+## Move beagle file to PCAngsd folder, call genotypes with PCAngsd
 
     python pcangsd.py -beagle angsdgl_WGS.beagle.gz -geno 0.9 -o arkgenosRaptEcr -threads 10
     
@@ -72,4 +72,4 @@ If you have two folders of files with identical filenames ('mergelist') to be me
     
 ## Estimate covariance matrix and perform selection scan
 
-    python pcangsd.py -beagle angsdgl_WGS.beagle.gz -selection 1 -o WGS_sel -threads 10
+    python pcangsd.py -beagle angsdgl_WGS.beagle.gz -selection 1 -sites_save -o WGS_sel -threads 10
