@@ -4,7 +4,13 @@ Pipeline for aligning low- to medium-coverage WGS data to a given reference geno
 
 Note that many of these scripts are taken or modified from Ryan Peek's GitHub (https://ryanpeek.github.io)
 
-Requirements: SAMtools, BWA, ANGSD, PCAngsd, Python with Numpy
+Requirements: Must have SAMtools, BWA, ANGSD, Python with Numpy installed at the system level
+
+PCAngsd comes from here:
+
+    git clone https://github.com/Rosemeis/pcangsd.git
+    cd pcangsd/
+    python setup.py build_ext --inplace
 
 This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences from a given Illumina are already demultiplexed and compiled in a folder, along with fasta file for reference genome.
 
