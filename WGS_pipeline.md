@@ -93,7 +93,7 @@ To read genotypes and output a summary of per indiviual of # SNPs homozygous for
     homhet = numpy.count_nonzero(data == 1, axis=1)
     hommis = numpy.count_nonzero(data == -9, axis=1)
     genosum=numpy.column_stack((homref,homhet,homalt,hommis))
-    numpy.savetxt("arkgenosumEcr_indf.csv",genosum,delimiter=",")
+    numpy.savetxt("WGS_genosum.csv",genosum,delimiter=",")
 
 To read admixture results and output Q matrix as a CSV:
 
