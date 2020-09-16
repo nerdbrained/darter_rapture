@@ -4,7 +4,7 @@ Pipeline for aligning low- to medium-coverage WGS data to a given reference geno
 
 Note that many of these scripts are taken or modified from Ryan Peek's GitHub (https://ryanpeek.github.io)
 
-Requirements: Must have SAMtools, BWA, ANGSD, Python with Numpy installed at the system level
+Requirements: Must have SAMtools, BWA, ANGSD, Python with Numpy installed at the system level, R for plotting results.
 
 PCAngsd comes from here:
 
@@ -50,9 +50,10 @@ This can also be implemented in parallel over a list of sequences ('bamlist') us
 
 ### Merge bam files for samples split across multiple lanes if needed:
 
-For two individual files ('file1.rmdup.bam and file2.rmdup.bam'):
+For two individual files ('sample.rmdup.bam'):
 
-    samtools merge mergebams/${str} <folder1>/${str} <folder2>/${str} > ${str}.sh
+    mkdir mergebams
+    samtools merge mergebams/sample.rmdup.bam <folder1>/sample.rmdup.bam <folder2>/'ample.rmdup.bam
     
 If you have two folders of files with identical filenames ('mergelist') to be merged you can use the merge.sh script (alter the foldernames first) on a SLURM system to merge bam files in parallel:
 
@@ -103,3 +104,9 @@ To read selection results and output selection scan statistics for each locus al
 
     data=numpy.load('WGS_sel.selection.npy')
     numpy.savetxt("WGS_sel.csv",data,delimiter=",")
+
+## Plotting results
+
+To plot admixture results (barplot and piecharts on a map), see admixplot.R
+
+To plot selection results (Manhattan plot), see selectionplot.R
