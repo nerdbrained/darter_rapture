@@ -69,9 +69,9 @@ Index reference genome if needed:
 
 ## Align sequences to reference using BWA, sort and filter using SAMtools
 
-I recommend running using the run_align.sh script (written for a SLURM system) to do this in parallel:
+I recommend running using the [run_align.sh](run_align.sh) script (written for a SLURM system) to do this in parallel:
   
-    sh run_WGAalign.sh <bamlist> <reference.fasta>
+    sh run_align.sh <bamlist> <reference.fasta>
     
 ## Align Rapture baits on reference genome and create .bed files
 
@@ -117,19 +117,19 @@ Make list of bam files for calculating coverage and filtering
 
     ls *.sort.flt1.bam > filterlist
 
-Run bedtools and generate coverage report per locus in parallel on a SLURM system - covcomp.sh script (this generates one file per individual):
+Run bedtools and generate coverage report per locus in parallel on a SLURM system - [covcomp.sh](covcomp.sh) script (this generates one file per individual):
 
     sh covcomp.sh filterlist allbuffer.bed
     
-Script for summarizing coverage files - covsum.sh:
+Script for summarizing coverage files - [covsum.sh](covsum.sh):
 
     sh covsum.sh
     
-Script for calculating per-base coverage over all loci in parallel on a SLURM system - perbase.sh: 
+Script for calculating per-base coverage over all loci in parallel on a SLURM system - [perbase.sh](perbase.sh): 
 
     sh perbase.sh filterlist allbuffer.bed
 
-Script for filtering all .bam files in parallel on a SLURM system - filter.sh:
+Script for filtering all .bam files in parallel on a SLURM system - [filter.sh](filter.sh):
 
     sh filter.sh filterlist
 
