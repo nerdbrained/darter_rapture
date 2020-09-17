@@ -44,7 +44,7 @@ This can be done for an individual sequence files ('sample.R1.fastq.gz' and 'sam
     samtools sort -o <sample>.positionsort.bam <sample>.fixmate.bam
     samtools markdup -r <sample>.positionsort.bam <sample>.rmdup.bam
 
-This can also be implemented in parallel over a list of sequences ('bamlist') using the run_WGAalign.sh script on a SLURM system:
+This can also be implemented in parallel over a list of sequences ('bamlist') using the [run_WGAalign.sh](run_WGAalign.sh) script on a SLURM system:
   
     sh run_WGAalign.sh <bamlist> <reference.fasta>
 
@@ -55,7 +55,7 @@ For two individual files ('sample.rmdup.bam'):
     mkdir mergebams
     samtools merge mergebams/sample.rmdup.bam <folder1>/sample.rmdup.bam <folder2>/'ample.rmdup.bam
     
-If you have two folders of files with identical filenames ('mergelist') to be merged you can use the merge.sh script (alter the foldernames first) on a SLURM system to merge bam files in parallel:
+If you have two folders of files with identical filenames ('mergelist') to be merged you can use the [merge.sh](merge.sh) script (alter the foldernames first) on a SLURM system to merge bam files in parallel:
 
     sh merge.sh mergelist
 
@@ -107,6 +107,6 @@ To read selection results and output selection scan statistics for each locus al
 
 ## Plotting results
 
-To plot admixture results (barplot and piecharts on a map), see admixplot.R
+To plot admixture results (barplot and piecharts on a map), see [plot_admix.R](plot_admix.R)
 
-To plot selection results (Manhattan plot), see selectionplot.R
+To plot selection results (Manhattan plot), see [plot_selection.R](plot_selection.R)
