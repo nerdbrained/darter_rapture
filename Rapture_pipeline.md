@@ -145,7 +145,7 @@ Running a simple concatenated maximum likelihood analyis in iqtree:
 
     bin/iqtree -s phyfile -B 1000
 
-For time-calibrating tree and plotting trees see darterrapture_phyloscripts.R
+For time-calibrating tree and plotting trees see: [darterrapture_phyloscripts.R](darterrapture_phyloscripts.R)
 
 ## For a list of bam files ('bamlist') calculate genotype likelihoods in ANGSD
 We did this locally and had to increase maximum # of open files. Change the -minInd parameter to 1/2 of total number of individuals.
@@ -191,6 +191,6 @@ To read selection results and output selection scan statistics for each locus al
 
 ## Plotting results
 
-To plot admixture results (barplot and piecharts on a map), see admixplot.R
+To plot admixture results (barplot and piecharts on a map), see [plot_admix.R](plot_admix.R)
 
-To plot selection results (Manhattan plot), see selectionplot.R
+To plot selection results (Manhattan plot), see [plot_selection.R](plot_selection.R)
