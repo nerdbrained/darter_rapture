@@ -3,6 +3,6 @@ Analysis scripts for working with low-coverage whole-genome and RADseq+sequence 
 
 For a step-by-step description of the Rapture pipeline see: [Rapture_pipeline.md](Rapture_pipeline.md)
 
-For a step-by-step description of the WGS pipeline see: WGS_pipeline.md 
+For a step-by-step description of the WGS pipeline see: [WGS_pipeline.md](WGS_pipeline.md)
 
-The bait sequences developed for darters (genus Etheostoma) can be found at: final.set.fas
+The bait sequences developed for darters (genus Etheostoma) can be found at: [final.set.fas](final.set.fas)
