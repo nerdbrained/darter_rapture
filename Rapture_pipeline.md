@@ -141,7 +141,11 @@ This can be done in Stacks - we generated a reduced subset of .bam files for phy
 
 ## Phylogenetic analyses and plotting
 
-See darterrapture_phyloscripts.R
+Running a simple concatenated maximum likelihood analyis in iqtree:
+
+    bin/iqtree -s phyfile -B 1000
+
+For time-calibrating tree and plotting trees see darterrapture_phyloscripts.R
 
 ## For a list of bam files ('bamlist') calculate genotype likelihoods in ANGSD
 We did this locally and had to increase maximum # of open files. Change the -minInd parameter to 1/2 of total number of individuals.
