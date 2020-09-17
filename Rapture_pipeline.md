@@ -141,7 +141,7 @@ This can be done in Stacks - we generated a reduced subset of .bam files for phy
 
 ## Phylogenetic analyses and plotting
 
-Running a simple concatenated maximum likelihood analyis in iqtree:
+Running a simple concatenated maximum likelihood analyis in [iqtree](http://www.iqtree.org/):
 
     bin/iqtree -s phyfile -B 1000
 
