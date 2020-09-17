@@ -17,7 +17,7 @@ do
 	module load GCC/6.4.0-2.28
 	module load SAMtools
  	samtools view -b -h -L allbuffer.bed -o bamfilter/${c2}.filter.bam bams/${c1} " > ${c1}.sh
-	sbatch -t 24:00:00 -p med --mem=10G ${c1}.NSsh
+	sbatch -t 24:00:00 -p med --mem=10G ${c1}.sh
 	sleep 2
 	x=$(( $x + 1 ))
 done
