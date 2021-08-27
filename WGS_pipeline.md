@@ -30,7 +30,7 @@ This pipeline assumes that raw forward (R1) and reverse (R2) shotgun sequences f
 
 ### Index reference genome if needed:
 
-    samtools index <reference.fasta>
+    bwa index <reference.fasta>
 
 ### Align sequences to reference using BWA, sort, filter, and marking + removing duplicates using BWA + SAMtools:
 
