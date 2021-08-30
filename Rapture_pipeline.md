@@ -65,7 +65,7 @@ Make list of all sequence files in folder:
 
 Index reference genome if needed:
 
-    samtools index <reference.fasta>
+    bwa index <reference.fasta>
 
 ## Align sequences to reference using BWA, sort and filter using SAMtools
 
