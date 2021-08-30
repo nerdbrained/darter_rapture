@@ -13,7 +13,7 @@ do
 	module load OpenMPI/2.1.1
 	module load GCC/6.4.0-2.28
 	module load SAMtools
- 	samtools merge mergebams/${str} <folder1>/${str} <folder2>/${str} > ${str}.sh 
+ 	samtools merge mergebams/${str} <folder1>/${str} <folder2>/${str}" > ${str}.sh 
 	sbatch -t 3:00:00 -p med --mem=4G ${str}.sh
 	sleep 2
 	x=$(( $x + 1 ))
